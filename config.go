@@ -2,12 +2,6 @@ package main
 
 import (
 	"github.com/wendorf/terraform-provider-cloudfoundry/cloud_controller"
-	"fmt"
-	"net/http"
-	"errors"
-	"io/ioutil"
-	"github.com/wendorf/terraform-provider-cloudfoundry/cloud_controller/models"
-	"encoding/json"
 )
 
 type Config struct {
@@ -25,20 +19,10 @@ func (c *Config) load(organizationName string) error {
 	}
 	c.Client = client
 
-	resp, err := c.Client.Get(fmt.Sprintf("/v2/organizations?q=name:%s", organizationName))
+	c.OrganizationGUID, err = c.Client.Organizations.GetGUID(organizationName)
 	if err != nil {
 		return err
 	}
-
-	if resp.StatusCode != http.StatusOK {
-		return errors.New(fmt.Sprintf("Could not fetch organization %s", organizationName))
-	}
-
-	responseBody, err := ioutil.ReadAll(resp.Body)
-	v2Collection := models.V2Collection{}
-	json.Unmarshal(responseBody, &v2Collection)
-
-	c.OrganizationGUID = v2Collection.V2Objects[0].Metadata.GUID
 
 	return nil
 }

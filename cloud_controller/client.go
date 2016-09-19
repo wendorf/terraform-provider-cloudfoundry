@@ -14,6 +14,7 @@ import (
 )
 
 type Client struct {
+	Organizations OrganizationsClient
 	httpClient  *http.Client
 	apiEndpoint string
 }
@@ -46,10 +47,14 @@ func NewClient(apiEndpoint, username, password string) (*Client, error) {
 		return nil, err
 	}
 
-	return &Client{
+	client := &Client{
 		httpClient: oauthClient,
 		apiEndpoint: apiEndpoint,
-	}, nil
+	}
+	client.Organizations = OrganizationsClient{
+		client: client,
+	}
+	return client, nil
 }
 
 func (c *Client) Get(path string) (*http.Response, error) {

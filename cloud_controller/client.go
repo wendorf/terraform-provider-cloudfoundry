@@ -10,9 +10,10 @@ import (
 	"context"
 	"encoding/json"
 	"io/ioutil"
+	"bytes"
 )
 
-type client struct {
+type Client struct {
 	httpClient  *http.Client
 	apiEndpoint string
 }
@@ -34,7 +35,7 @@ type info struct {
 //	return string(responseBody), nil
 //}
 
-func NewClient(apiEndpoint, username, password string) (*client, error) {
+func NewClient(apiEndpoint, username, password string) (*Client, error) {
 	info, err := newInfo(apiEndpoint)
 	if err != nil {
 		return nil, err
@@ -45,15 +46,37 @@ func NewClient(apiEndpoint, username, password string) (*client, error) {
 		return nil, err
 	}
 
-	return &client{
+	return &Client{
 		httpClient: oauthClient,
 		apiEndpoint: apiEndpoint,
 	}, nil
 }
 
-func (c *client) Get(path string) (*http.Response, error) {
-
+func (c *Client) Get(path string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", c.apiEndpoint, path), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.httpClient.Do(req)
+}
+
+func (c *Client) Delete(path string) (*http.Response, error) {
+	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s%s", c.apiEndpoint, path), nil)
+	if err != nil {
+		return nil, err
+	}
+
+	return c.httpClient.Do(req)
+}
+
+func (c *Client) Post(path string, body interface{}) (*http.Response, error) {
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.apiEndpoint, path), bytes.NewReader(bodyBytes))
 	if err != nil {
 		return nil, err
 	}

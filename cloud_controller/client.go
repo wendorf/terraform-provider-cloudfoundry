@@ -84,6 +84,20 @@ func (c *Client) Post(path string, body interface{}) (*http.Response, error) {
 	return c.httpClient.Do(req)
 }
 
+func (c *Client) Put(path string, body interface{}) (*http.Response, error) {
+	bodyBytes, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+
+	req, err := http.NewRequest("PUT", fmt.Sprintf("%s%s", c.apiEndpoint, path), bytes.NewReader(bodyBytes))
+	if err != nil {
+		return nil, err
+	}
+
+	return c.httpClient.Do(req)
+}
+
 func newInfo(apiEndpoint string) (info, error) {
 	var (
 		info info

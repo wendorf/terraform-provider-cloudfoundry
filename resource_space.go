@@ -60,6 +60,20 @@ func resourceSpaceRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceSpaceUpdate(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	space := models.Space{
+		Name: d.Get("name").(string),
+		OrganizationGUID: config.OrganizationGUID,
+	}
+	resp, err := config.Client.Put(fmt.Sprintf("/v2/spaces/%s", d.Id()), space)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return errors.New(fmt.Sprintf("Could not update space %s", d.Get("name").(string)))
+	}
+
 	return nil
 }
 

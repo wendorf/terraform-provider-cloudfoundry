@@ -37,6 +37,10 @@ func resourceSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		return err
 	}
 
+	if resp.StatusCode != http.StatusCreated {
+		return errors.New(fmt.Sprintf("Could not create space %s", d.Get("name").(string)))
+	}
+
 	responseBody, err := ioutil.ReadAll(resp.Body)
 	v2Object := models.V2Object{}
 	json.Unmarshal(responseBody, &v2Object)

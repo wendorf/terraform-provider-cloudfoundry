@@ -19,7 +19,7 @@ func Provider() *schema.Provider {
 				Type:     schema.TypeString,
 				Required: true,
 			},
-			"organization_guid": {
+			"organization": {
 				Type:     schema.TypeString,
 				Required: true,
 			},
@@ -36,10 +36,9 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ApiEndpoint: d.Get("api_endpoint").(string),
 		Username:     d.Get("username").(string),
 		Password:      d.Get("password").(string),
-		OrganizationGUID:      d.Get("organization_guid").(string),
 	}
 
-	if err := config.load(); err != nil {
+	if err := config.load(d.Get("organization").(string)); err != nil {
 		return nil, err
 	}
 

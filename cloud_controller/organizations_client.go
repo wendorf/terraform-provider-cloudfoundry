@@ -14,18 +14,28 @@ type OrganizationsClient struct {
 }
 
 func (c *OrganizationsClient) GetGUID(name string) (string, error) {
-	resp, err := c.client.Get(fmt.Sprintf("/v2/organizations?q=name:%s", name))
+	organizationCollection, err := c.List(fmt.Sprintf("name:%s", name))
 	if err != nil {
 		return "", err
 	}
 
+	return organizationCollection.Organizations[0].Metadata.GUID, nil
+}
+
+func (c *OrganizationsClient) List(query string) (models.OrganizationCollection, error) {
+	var organizationCollection models.OrganizationCollection
+
+	resp, err := c.client.Get(fmt.Sprintf("/v2/organizations?q=%s", query))
+	if err != nil {
+		return organizationCollection, err
+	}
+
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.New(fmt.Sprintf("Could not fetch organization %s", name))
+		return organizationCollection, errors.New(fmt.Sprintf("Could not fetch organizations: %s", query))
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
-	v2Collection := models.V2Collection{}
-	json.Unmarshal(responseBody, &v2Collection)
+	json.Unmarshal(responseBody, &organizationCollection)
 
-	return v2Collection.V2Objects[0].Metadata.GUID, nil
+	return organizationCollection, nil
 }

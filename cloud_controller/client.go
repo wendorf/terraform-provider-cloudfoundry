@@ -15,6 +15,9 @@ import (
 
 type Client struct {
 	Organizations OrganizationsClient
+	Spaces SpacesClient
+	Services ServicesClient
+	ServicePlans ServicePlansClient
 	httpClient  *http.Client
 	apiEndpoint string
 }
@@ -23,18 +26,6 @@ type info struct {
 	AuthorizationEndpoint string `json:"authorization_endpoint"`
 	TokenEndpoint         string `json:"token_endpoint"`
 }
-
-//func getSampleResponse(apiEndpoint, username, password) (string, error) {
-//	client, err := cloud_controller.NewClient(apiEndpoint, username, password)
-//	if err != nil {
-//		return "", err
-//	}
-//
-//	response, err := client.Get("/v2/organizations")
-//	responseBody, err := ioutil.ReadAll(response.Body)
-//
-//	return string(responseBody), nil
-//}
 
 func NewClient(apiEndpoint, username, password string) (*Client, error) {
 	info, err := newInfo(apiEndpoint)
@@ -51,9 +42,10 @@ func NewClient(apiEndpoint, username, password string) (*Client, error) {
 		httpClient: oauthClient,
 		apiEndpoint: apiEndpoint,
 	}
-	client.Organizations = OrganizationsClient{
-		client: client,
-	}
+	client.Organizations = OrganizationsClient{client: client, }
+	client.Spaces = SpacesClient{client: client, }
+	client.Services = ServicesClient{client: client, }
+	client.ServicePlans = ServicePlansClient{client: client, }
 	return client, nil
 }
 

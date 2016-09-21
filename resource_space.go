@@ -43,10 +43,10 @@ func resourceSpaceCreate(d *schema.ResourceData, m interface{}) error {
 		return errors.New(fmt.Sprintf("Could not create space %s: %s", d.Get("name").(string), string(responseBody)))
 	}
 
-	v2Object := models.V2Object{}
-	json.Unmarshal(responseBody, &v2Object)
+	spaceWrapper := models.SpaceWrapper{}
+	json.Unmarshal(responseBody, &spaceWrapper)
 
-	d.SetId(v2Object.Metadata.GUID)
+	d.SetId(spaceWrapper.Metadata.GUID)
 	return nil
 }
 

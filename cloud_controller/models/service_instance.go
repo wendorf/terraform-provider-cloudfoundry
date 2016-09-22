@@ -2,7 +2,7 @@ package models
 
 type ServiceInstance struct {
 	Name            string `json:"name"`
-	SpaceGUID       string `json:"space_guid"`
+	SpaceGUID       string `json:"space_guid,omitempty"`
 	ServicePlanGUID string `json:"service_plan_guid"`
 }
 

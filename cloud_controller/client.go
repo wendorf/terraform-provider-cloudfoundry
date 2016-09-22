@@ -15,11 +15,12 @@ import (
 
 type Client struct {
 	Organizations OrganizationsClient
-	Spaces SpacesClient
-	Services ServicesClient
-	ServicePlans ServicePlansClient
-	httpClient  *http.Client
-	apiEndpoint string
+	Spaces        SpacesClient
+	Services      ServicesClient
+	ServicePlans  ServicePlansClient
+	Domains       DomainsClient
+	httpClient    *http.Client
+	apiEndpoint   string
 }
 
 type info struct {
@@ -46,6 +47,7 @@ func NewClient(apiEndpoint, username, password string) (*Client, error) {
 	client.Spaces = SpacesClient{client: client, }
 	client.Services = ServicesClient{client: client, }
 	client.ServicePlans = ServicePlansClient{client: client, }
+	client.Domains = DomainsClient{client: client, }
 	return client, nil
 }
 
@@ -103,7 +105,11 @@ func newInfo(apiEndpoint string) (info, error) {
 		body []byte
 	)
 
-	if response, err = http.Get(fmt.Sprintf("%s/v2/info", apiEndpoint)); err != nil {
+	client := &http.Client{Transport: &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}}
+
+	if response, err = client.Get(fmt.Sprintf("%s/v2/info", apiEndpoint)); err != nil {
 		return info, err
 	}
 

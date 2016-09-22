@@ -27,6 +27,7 @@ func Provider() *schema.Provider {
 		ResourcesMap: map[string]*schema.Resource{
 			"cloudfoundry_space": resourceSpace(),
 			"cloudfoundry_service_instance": resourceServiceInstance(),
+			"cloudfoundry_route": resourceRoute(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

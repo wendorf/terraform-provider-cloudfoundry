@@ -53,6 +53,7 @@ func NewClient(apiEndpoint, username, password string, skipSSLValidation bool) (
 
 func (c *Client) Get(path string) (*http.Response, error) {
 	req, err := http.NewRequest("GET", fmt.Sprintf("%s%s", c.apiEndpoint, path), nil)
+	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -62,6 +63,7 @@ func (c *Client) Get(path string) (*http.Response, error) {
 
 func (c *Client) Delete(path string) (*http.Response, error) {
 	req, err := http.NewRequest("DELETE", fmt.Sprintf("%s%s", c.apiEndpoint, path), nil)
+	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -76,6 +78,7 @@ func (c *Client) Post(path string, body interface{}) (*http.Response, error) {
 	}
 
 	req, err := http.NewRequest("POST", fmt.Sprintf("%s%s", c.apiEndpoint, path), bytes.NewReader(bodyBytes))
+	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
 	}
@@ -90,6 +93,7 @@ func (c *Client) Put(path string, body interface{}) (*http.Response, error) {
 	}
 
 	req, err := http.NewRequest("PUT", fmt.Sprintf("%s%s", c.apiEndpoint, path), bytes.NewReader(bodyBytes))
+	req.Header.Add("Content-Type", "application/json")
 	if err != nil {
 		return nil, err
 	}

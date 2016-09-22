@@ -106,7 +106,7 @@ func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error 
 	responseBody, err := ioutil.ReadAll(resp.Body)
 
 	if resp.StatusCode != http.StatusCreated {
-		return errors.New(fmt.Sprintf("Could not create service instance %s: %s", d.Get("name").(string), string(responseBody)))
+		return errors.New(fmt.Sprintf("Could not update service instance %s: %s", d.Get("name").(string), string(responseBody)))
 	}
 
 	serviceInstanceWrapper := models.ServiceInstanceWrapper{}

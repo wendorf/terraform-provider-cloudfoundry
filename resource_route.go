@@ -86,6 +86,42 @@ func resourceRouteRead(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceRouteUpdate(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+
+	spaceGuid, err := config.Client.Spaces.GetGUID(d.Get("space").(string))
+	if err != nil {
+		return err
+	}
+
+	domainGuid, err := config.Client.Domains.GetGUID(d.Get("domain").(string))
+	if err != nil {
+		return err
+	}
+
+	route := models.Route{
+		Host: d.Get("host").(string),
+		SpaceGUID: spaceGuid,
+		DomainGUID: domainGuid,
+	}
+
+	resp, err := config.Client.Put(fmt.Sprintf("/v2/routes/%s", d.Id()), route)
+	if err != nil {
+		return err
+	}
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusCreated {
+		return errors.New(fmt.Sprintf("Could not update route %s: %s", d.Get("host").(string), string(responseBody)))
+	}
+
+	var domainWrapper models.DomainWrapper
+	json.Unmarshal(responseBody, &domainWrapper)
+
+	d.SetId(domainWrapper.Metadata.GUID)
 	return nil
 }
 

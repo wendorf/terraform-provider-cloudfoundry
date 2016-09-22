@@ -33,6 +33,7 @@ func Provider() *schema.Provider {
 			"cloudfoundry_space": resourceSpace(),
 			"cloudfoundry_service_instance": resourceServiceInstance(),
 			"cloudfoundry_route": resourceRoute(),
+			"cloudfoundry_app": resourceApp(),
 		},
 		ConfigureFunc: providerConfigure,
 	}

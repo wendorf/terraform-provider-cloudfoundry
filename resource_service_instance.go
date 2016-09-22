@@ -65,7 +65,7 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
 
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusAccepted {
 		return errors.New(fmt.Sprintf("Could not create service instance %s: %s", d.Get("name").(string), string(responseBody)))
 	}
 
@@ -114,7 +114,7 @@ func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	if resp.StatusCode != http.StatusAccepted {
+	if resp.StatusCode != http.StatusCreated && resp.StatusCode != http.StatusAccepted {
 		return errors.New(fmt.Sprintf("Could not update service instance %s: %s", d.Get("name").(string), string(responseBody)))
 	}
 

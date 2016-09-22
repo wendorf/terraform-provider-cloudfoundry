@@ -48,6 +48,9 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	servicePlanGUID, err := config.Client.ServicePlans.GetGUID(d.Get("service").(string), d.Get("service_plan").(string))
+	if err != nil {
+		return err
+	}
 
 	serviceInstance := models.ServiceInstance{
 		Name: d.Get("name").(string),
@@ -92,6 +95,9 @@ func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error 
 	config := m.(*Config)
 
 	servicePlanGUID, err := config.Client.ServicePlans.GetGUID(d.Get("service").(string), d.Get("service_plan").(string))
+	if err != nil {
+		return err
+	}
 
 	serviceInstance := models.ServiceInstance{
 		Name: d.Get("name").(string),
@@ -104,6 +110,9 @@ func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
 	if resp.StatusCode != http.StatusAccepted {
 		return errors.New(fmt.Sprintf("Could not update service instance %s: %s", d.Get("name").(string), string(responseBody)))

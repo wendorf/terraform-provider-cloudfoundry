@@ -38,6 +38,9 @@ func resourceSpaceCreate(d *schema.ResourceData, m interface{}) error {
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
 
 	if resp.StatusCode != http.StatusCreated {
 		return errors.New(fmt.Sprintf("Could not create space %s: %s", d.Get("name").(string), string(responseBody)))

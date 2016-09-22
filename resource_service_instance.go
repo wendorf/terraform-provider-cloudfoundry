@@ -55,7 +55,7 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 		ServicePlanGUID: servicePlanGUID,
 	}
 
-	resp, err := config.Client.Post("/v2/service_instances", serviceInstance)
+	resp, err := config.Client.Post("/v2/service_instances?accepts_incomplete=true", serviceInstance)
 	if err != nil {
 		return err
 	}
@@ -98,14 +98,14 @@ func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error 
 		ServicePlanGUID: servicePlanGUID,
 	}
 
-	resp, err := config.Client.Put(fmt.Sprintf("/v2/service_instances/%s", d.Id()), serviceInstance)
+	resp, err := config.Client.Put(fmt.Sprintf("/v2/service_instances/%s?accepts_incomplete=true", d.Id()), serviceInstance)
 	if err != nil {
 		return err
 	}
 
 	responseBody, err := ioutil.ReadAll(resp.Body)
 
-	if resp.StatusCode != http.StatusCreated {
+	if resp.StatusCode != http.StatusAccepted {
 		return errors.New(fmt.Sprintf("Could not update service instance %s: %s", d.Get("name").(string), string(responseBody)))
 	}
 

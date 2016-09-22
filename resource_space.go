@@ -50,6 +50,18 @@ func resourceSpaceCreate(d *schema.ResourceData, m interface{}) error {
 	json.Unmarshal(responseBody, &spaceWrapper)
 
 	d.SetId(spaceWrapper.Metadata.GUID)
+
+	username := models.Username{Username: config.Username}
+	resp, err = config.Client.Put(fmt.Sprintf("/v2/spaces/%s/developers", spaceWrapper.Metadata.GUID), username)
+	if err != nil {
+		return err
+	}
+
+	resp, err = config.Client.Put(fmt.Sprintf("/v2/spaces/%s/managers", spaceWrapper.Metadata.GUID), username)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 

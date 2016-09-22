@@ -28,13 +28,13 @@ type info struct {
 	TokenEndpoint         string `json:"token_endpoint"`
 }
 
-func NewClient(apiEndpoint, username, password string) (*Client, error) {
-	info, err := newInfo(apiEndpoint)
+func NewClient(apiEndpoint, username, password string, skipSSLValidation bool) (*Client, error) {
+	info, err := newInfo(apiEndpoint, skipSSLValidation)
 	if err != nil {
 		return nil, err
 	}
 
-	oauthClient, err := newOauthClient(info.AuthorizationEndpoint, info.TokenEndpoint, username, password)
+	oauthClient, err := newOauthClient(info.AuthorizationEndpoint, info.TokenEndpoint, username, password, skipSSLValidation)
 	if err != nil {
 		return nil, err
 	}
@@ -97,7 +97,7 @@ func (c *Client) Put(path string, body interface{}) (*http.Response, error) {
 	return c.httpClient.Do(req)
 }
 
-func newInfo(apiEndpoint string) (info, error) {
+func newInfo(apiEndpoint string, skipSSLValidation bool) (info, error) {
 	var (
 		info info
 		response *http.Response
@@ -106,7 +106,7 @@ func newInfo(apiEndpoint string) (info, error) {
 	)
 
 	client := &http.Client{Transport: &http.Transport{
-		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: skipSSLValidation},
 	}}
 
 	if response, err = client.Get(fmt.Sprintf("%s/v2/info", apiEndpoint)); err != nil {
@@ -124,7 +124,7 @@ func newInfo(apiEndpoint string) (info, error) {
 	return info, nil
 }
 
-func newOauthClient(authorizationEndpoint, tokenEndpoint, username, password string) (*http.Client, error) {
+func newOauthClient(authorizationEndpoint, tokenEndpoint, username, password string, skipSSLValidation bool) (*http.Client, error) {
 	conf := &oauth2.Config{
 		ClientID:     "cf",
 		ClientSecret: "",
@@ -137,7 +137,7 @@ func newOauthClient(authorizationEndpoint, tokenEndpoint, username, password str
 	httpClient := &http.Client{
 		Transport: &http.Transport{
 			TLSClientConfig: &tls.Config{
-				InsecureSkipVerify: false,
+				InsecureSkipVerify: skipSSLValidation,
 			},
 			Dial: (&net.Dialer{
 				Timeout:   5 * time.Second,

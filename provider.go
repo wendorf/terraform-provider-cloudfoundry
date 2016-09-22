@@ -23,6 +23,11 @@ func Provider() *schema.Provider {
 				Type:     schema.TypeString,
 				Required: true,
 			},
+			"skip_ssl_validation": {
+				Type:     schema.TypeBool,
+				Optional: true,
+				Default: false,
+			},
 		},
 		ResourcesMap: map[string]*schema.Resource{
 			"cloudfoundry_space": resourceSpace(),
@@ -38,6 +43,7 @@ func providerConfigure(d *schema.ResourceData) (interface{}, error) {
 		ApiEndpoint: d.Get("api_endpoint").(string),
 		Username:     d.Get("username").(string),
 		Password:      d.Get("password").(string),
+		SkipSSLValidation:      d.Get("skip_ssl_validation").(bool),
 	}
 
 	if err := config.load(d.Get("organization").(string)); err != nil {

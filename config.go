@@ -5,15 +5,16 @@ import (
 )
 
 type Config struct {
-	ApiEndpoint      string
-	Username         string
-	Password         string
-	OrganizationGUID string
-	Client           *cloud_controller.Client
+	ApiEndpoint       string
+	Username          string
+	Password          string
+	OrganizationGUID  string
+	SkipSSLValidation bool
+	Client            *cloud_controller.Client
 }
 
 func (c *Config) load(organizationName string) error {
-	client, err := cloud_controller.NewClient(c.ApiEndpoint, c.Username, c.Password)
+	client, err := cloud_controller.NewClient(c.ApiEndpoint, c.Username, c.Password, c.SkipSSLValidation)
 	if err != nil {
 		return err
 	}

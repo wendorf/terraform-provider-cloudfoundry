@@ -25,6 +25,7 @@ func resourceServiceInstance() *schema.Resource {
 			"space": {
 				Type:     schema.TypeString,
 				Required: true,
+				ForceNew: true,
 			},
 			"service": {
 				Type:     schema.TypeString,
@@ -46,22 +47,7 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 		return err
 	}
 
-	services, err := config.Client.Services.List(fmt.Sprintf("label:%s", d.Get("service").(string)))
-	if err != nil {
-		return err
-	}
-
-	servicePlanCollection, err := config.Client.ServicePlans.List(fmt.Sprintf("service_guid:%s", services.Services[0].Metadata.GUID))
-	if err != nil {
-		return err
-	}
-
-	var servicePlanGUID string
-	for _, servicePlanWrapper := range servicePlanCollection.ServicePlans {
-		if servicePlanWrapper.ServicePlan.Name == d.Get("service_plan").(string) {
-			servicePlanGUID = servicePlanWrapper.Metadata.GUID
-		}
-	}
+	servicePlanGUID, err := config.Client.ServicePlans.GetGUID(d.Get("service").(string), d.Get("service_plan").(string))
 
 	serviceInstance := models.ServiceInstance{
 		Name: d.Get("name").(string),
@@ -70,6 +56,49 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 	}
 
 	resp, err := config.Client.Post("/v2/service_instances", serviceInstance)
+	if err != nil {
+		return err
+	}
+
+	responseBody, err := ioutil.ReadAll(resp.Body)
+
+	if resp.StatusCode != http.StatusAccepted {
+		return errors.New(fmt.Sprintf("Could not create service instance %s: %s", d.Get("name").(string), string(responseBody)))
+	}
+
+	serviceInstanceWrapper := models.ServiceInstanceWrapper{}
+	json.Unmarshal(responseBody, &serviceInstanceWrapper)
+
+	d.SetId(serviceInstanceWrapper.Metadata.GUID)
+
+	return nil
+}
+
+func resourceServiceInstanceRead(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	resp, err := config.Client.Get(fmt.Sprintf("/v2/service_instances/%s", d.Id()))
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		d.SetId("")
+	}
+
+	return nil
+}
+
+func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+
+	servicePlanGUID, err := config.Client.ServicePlans.GetGUID(d.Get("service").(string), d.Get("service_plan").(string))
+
+	serviceInstance := models.ServiceInstance{
+		Name: d.Get("name").(string),
+		ServicePlanGUID: servicePlanGUID,
+	}
+
+	resp, err := config.Client.Put(fmt.Sprintf("/v2/service_instances/%s", d.Id()), serviceInstance)
 	if err != nil {
 		return err
 	}
@@ -88,14 +117,16 @@ func resourceServiceInstanceCreate(d *schema.ResourceData, m interface{}) error 
 	return nil
 }
 
-func resourceServiceInstanceRead(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
-func resourceServiceInstanceUpdate(d *schema.ResourceData, m interface{}) error {
-	return nil
-}
-
 func resourceServiceInstanceDelete(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	resp, err := config.Client.Delete(fmt.Sprintf("/v2/service_instances/%s", d.Id()))
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusNoContent {
+		return errors.New(fmt.Sprintf("Could not delete service instance %s", d.Get("name").(string)))
+	}
+
 	return nil
 }

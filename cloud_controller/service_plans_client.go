@@ -10,7 +10,27 @@ import (
 )
 
 type ServicePlansClient struct {
-	client  *Client
+	client *Client
+}
+
+func (c *ServicePlansClient) GetGUID(service, servicePlan string) (string, error) {
+	services, err := c.client.Services.List(fmt.Sprintf("label:%s", service))
+	if err != nil {
+		return "", err
+	}
+
+	servicePlanCollection, err := c.List(fmt.Sprintf("service_guid:%s", services.Services[0].Metadata.GUID))
+	if err != nil {
+		return "", err
+	}
+
+	for _, servicePlanWrapper := range servicePlanCollection.ServicePlans {
+		if servicePlanWrapper.ServicePlan.Name == servicePlan {
+			return servicePlanWrapper.Metadata.GUID, nil
+		}
+	}
+
+	return "", errors.New(fmt.Sprintf("Could not find service plan %s for service %s", servicePlan, service))
 }
 
 func (c *ServicePlansClient) List(query string) (models.ServicePlanCollection, error) {

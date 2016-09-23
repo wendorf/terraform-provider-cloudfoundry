@@ -65,6 +65,16 @@ func resourceAppCreate(d *schema.ResourceData, m interface{}) error {
 }
 
 func resourceAppRead(d *schema.ResourceData, m interface{}) error {
+	config := m.(*Config)
+	resp, err := config.Client.Get(fmt.Sprintf("/v3/apps/%s", d.Id()))
+	if err != nil {
+		return err
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		d.SetId("")
+	}
+
 	return nil
 }
 
